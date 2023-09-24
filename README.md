@@ -4,7 +4,7 @@ Wasm-git
 
 ![](https://travis-ci.com/petersalomonsen/wasm-git.svg?branch=master)
 
-GIT for nodejs and the browser using [libgit2](https://libgit2.org/) compiled to WebAssembly with [Emscripten](https://emscripten.org).
+GIT for browser using [libgit2](https://libgit2.org/) compiled to WebAssembly with [Emscripten](https://emscripten.org).
 
 # Demo in the browser
 
@@ -126,34 +126,6 @@ async function test() {
 Note that the compiled output is about twice the size for non-async builds, and that git operations will take place on the main thread which can affect reponsiveness of your web UI.
 
 See below for more details on building using `build.sh`.
-# Use from nodejs with pre built binaries
-
-You may install the npm package containing the binaries:
-
-`npm install wasm-git`
-
-example source code for cloning a repository from github:
-
-```js
-const lg = require('./node_modules/wasm-git/lg2.js');
-
-lg.onRuntimeInitialized = () => {
-    const FS = lg.FS;
-    const MEMFS = FS.filesystems.MEMFS;
-
-    FS.mkdir('/working');
-    FS.mount(MEMFS, { }, '/working');
-    FS.chdir('/working');    
-
-    FS.writeFile('/home/web_user/.gitconfig', '[user]\n' +
-                'name = Test User\n' +
-                'email = test@example.com');
-    
-    // clone a repository from github
-    lg.callMain(['clone','https://github.com/torch2424/made-with-webassembly.git', 'made-with-webassembly']);
-    FS.readdir('made-with-webassembly');
-}
-```
 
 # Building
 
@@ -163,8 +135,6 @@ lg.onRuntimeInitialized = () => {
 - https://github.com/emscripten-core/emscripten/pull/10526
 - https://github.com/emscripten-core/emscripten/pull/10782
 
-for using with `NODEFS` you'll also need https://github.com/emscripten-core/emscripten/pull/10669
-
 All of these pull requests are merged to emscripten master as of 2020-03-29.
 
 See [.github/workflows/main.yml](./.github/workflows/main.yml) for a full build and test pipeline including installing emscripten.
@@ -172,7 +142,5 @@ See [.github/workflows/main.yml](./.github/workflows/main.yml) for a full build 
 Run [setup.sh](setup.sh) first to download libgit2 and apply patches.
 
 Given you have installed and activated emscripten, you can use the script in [emscriptenbuild/build.sh](emscriptenbuild/build.sh) to configure and build, and you'll find the resulting `lg2.js` / `lg2.wasm` under the generated `emscriptenbuild/examples` folder.
-
-An example of interacting with libgit2 from nodejs can be found in [examples/example_node.js](examples/example_node.js).
 
 An example for the browser (using webworkers) can be found in [examples/example_webworker.js](examples/example_webworker.js). You can start a webserver for this by running the [examples/webserverwithgithubproxy.js](examples/webserverwithgithubproxy.js) script, which will launch a http server at http://localhost:5000 with a proxy to github. Proxy instead of direct calls is needed because of CORS restrictions in a browser environment.
